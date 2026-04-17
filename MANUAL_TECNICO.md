@@ -1,12 +1,14 @@
-================================================================================
-##MANUAL TÉCNICO
-================================================================================
 
-##Manual técnico – Sistema de Puntos de Interés
-1. Introducción
+================
+## MANUAL TÉCNICO
+================
+
+## Manual técnico – Sistema de Puntos de Interés
+## 1. Introducción
+
 Este manual está dirigido a administradores y desarrolladores. Describe la arquitectura, configuración, despliegue, persistencia y localización de los componentes del sistema.
+## 2. Arquitectura general
 
-2. Arquitectura general
 El sistema se compone de cuatro contenedores Docker orquestados con Docker Compose:
 
 Contenedor	  Imagen / build        	Puerto interno	        Función
@@ -17,7 +19,7 @@ puntos_proxy	  nginx:alpine	                80 (expuesto)	        Proxy reverso 
 
 Todos los contenedores se comunican a través de una red interna definida por el usuario: proyecto_contenedores_red-interna (driver bridge). Esta red permite la resolución de nombres por nombre de servicio (ej. backend → IP del contenedor backend).
 
-3. Persistencia de datos
+## 3. Persistencia de datos
 Se definen dos volúmenes Docker:
 
 * datos-postgres: Almacena todos los datos de la base de datos (tablas, índices, configuraciones).
@@ -32,7 +34,7 @@ Además, el archivo de configuración del proxy se monta como bind mount (lectur
 ./nginx-proxy/nginx.conf → /etc/nginx/conf.d/default.conf. 
 Este archivo no es un volumen Docker, sino un archivo local del proyecto, por lo que su modificación requiere reconstruir el contenedor o reiniciarlo.
 
-4. Configuración mediante variables de entorno
+## 4. Configuración mediante variables de entorno
 El archivo .env (no versionado) contiene las siguientes variables:
 
 POSTGRES_USER=admin
@@ -41,9 +43,10 @@ POSTGRES_DB=puntos_interes
 DB_HOST=db
 DB_PORT=5432
 PROXY_PORT=80
+
 Estas variables son referenciadas en docker-compose.yml y pasadas a los contenedores. El backend también las lee mediante os.getenv().
 
-5. Despliegue paso a paso
+## 5. Despliegue paso a paso
 5.1 Requisitos de la máquina virtual
 	* Ubuntu 22.04 o superior.
 	* Docker Engine (versión 20.10+) y Docker Compose Plugin instalados.
@@ -73,7 +76,7 @@ Debe devolver un JSON con 5 puntos de interés precargados.
 
 Acceder a la interfaz web: http://localhost:8080 (desde el host) o http://<IP_VM>.
 
-6. Localización de la base de datos
+## 6. Localización de la base de datos
 La base de datos PostgreSQL+PostGIS se ejecuta dentro del contenedor puntos_db. Para conectarse directamente a la BD (por ejemplo, para depuración o consultas avanzadas):
 
 docker exec -it puntos_db psql -U admin -d puntos_interes
@@ -84,7 +87,7 @@ Allí se encuentran los archivos como PG_VERSION, base/, global/, pg_wal/, etc.
 Ubicación lógica dentro del contenedor:
 /var/lib/postgresql/data
 
-7. Mantenimiento y resolución de problemas comunes
+## 7. Mantenimiento y resolución de problemas comunes
 7.1 Reiniciar el sistema después de apagar la MV
 
 cd ~/proyecto_contenedores
@@ -120,7 +123,7 @@ Cambia a iptables-legacy:
 sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
 sudo systemctl restart docker
 
-8. Mejoras implementadas durante el desarrollo
+## 8. Mejoras implementadas durante el desarrollo
 Frontend independiente: se separó del backend en su propio contenedor Nginx.
 
 Corrección de indentación en main.py: se movió la creación de tablas al evento startup y se corrigió la indentación de get_db().
