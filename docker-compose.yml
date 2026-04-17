@@ -1,0 +1,62 @@
+services:
+  db:
+    image: postgis/postgis:15-3.4
+    container_name: puntos_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-seguro123}
+      POSTGRES_DB: ${POSTGRES_DB:-puntos_interes}
+    volumes:
+      - datos-postgres:/var/lib/postgresql/data
+    networks:
+      - red-interna
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-puntos_interes}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: puntos_backend
+    environment:
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-seguro123}
+      POSTGRES_DB: ${POSTGRES_DB:-puntos_interes}
+   # volumes:
+    #  - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - red-interna
+    # No hay línea 'command' aquí, se usa la del Dockerfile
+
+  frontend:
+    build: ./frontend
+    container_name: puntos_frontend
+    networks:
+      - red-interna
+
+  proxy:
+    image: nginx:alpine
+    container_name: puntos_proxy
+    ports:
+      - "${PROXY_PORT:-80}:80"
+    volumes:
+      - ./nginx-proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - red-interna
+
+networks:
+  red-interna:
+    driver: bridge
+
+volumes:
+  datos-postgres:

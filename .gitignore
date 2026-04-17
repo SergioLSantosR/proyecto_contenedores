@@ -1,0 +1,79 @@
+# Archivos de entorno y configuración sensible
+.env
+.env.local
+.env.*.local
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Entornos virtuales
+venv/
+env/
+ENV/
+.venv
+
+# Archivos de base de datos locales (por si acaso)
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+*.pid
+
+# Archivos de Docker (generados o temporales)
+docker-compose.override.yml
+*.dockerignore
+.dockerignore
+
+# Directorios de volúmenes locales (si alguien los crea por error)
+volumes/
+datos-postgres/
+logs-nginx/
+
+# Archivos de editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.bak
+
+# Archivos de pruebas y cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Archivos comprimidos o de backup
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.bak
+*.old
+
+# Archivos específicos del proyecto que no deben compartirse
+.env.example   # No, este SÍ debe subirse. Lo pongo comentado
+# .env.example   # ¡No incluir esta línea! .env.example SÍ va a GitHub
+
+# Pero si quieres mantener tu propio .env.example local sin subirlo (no recomendado):
+# .env.example.local
+
+# Archivos de documentación generada
+*.aux
+*.log
+*.out
+*.toc
+*.pdf   # Si no quieres subir PDFs, pero a veces se piden. Ajusta según tu criterio.

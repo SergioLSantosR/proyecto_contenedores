@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puntos de Interés</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 250px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .resultados {
+            margin-top: 30px;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+        .punto {
+            background: #ecf0f1;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .punto strong {
+            color: #2c3e50;
+        }
+        .filtros {
+            background: #e8f0fe;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Sistema de Registro de Puntos de Interés</h1>
+
+    <div class="formulario">
+        <h2>Agregar nuevo punto</h2>
+        <div class="form-group">
+            <label>Nombre:</label>
+            <input type="text" id="nombre" placeholder="Ej. Museo Nacional">
+        </div>
+        <div class="form-group">
+            <label>Descripción:</label>
+            <input type="text" id="descripcion" placeholder="Breve descripción">
+        </div>
+        <div class="form-group">
+            <label>Latitud:</label>
+            <input type="number" step="any" id="latitud" placeholder="-34.6037">
+        </div>
+        <div class="form-group">
+            <label>Longitud:</label>
+            <input type="number" step="any" id="longitud" placeholder="-58.3816">
+        </div>
+        <div class="form-group">
+            <label>Categoría:</label>
+            <select id="categoria">
+                <option value="cultural">Cultural</option>
+                <option value="gastronomico">Gastronómico</option>
+                <option value="natural">Natural</option>
+                <option value="servicio">Servicio</option>
+            </select>
+        </div>
+        <button onclick="crearPunto()">Registrar Punto</button>
+    </div>
+
+    <div class="filtros">
+        <h2>Consultar puntos</h2>
+        <div class="form-group">
+            <label>Filtrar por categoría:</label>
+            <input type="text" id="filtroCategoria" placeholder="ej. cultural">
+        </div>
+        <div class="form-group">
+            <label>Latitud centro:</label>
+            <input type="number" step="any" id="filtroLat" placeholder="-34.6037">
+        </div>
+        <div class="form-group">
+            <label>Longitud centro:</label>
+            <input type="number" step="any" id="filtroLng" placeholder="-58.3816">
+        </div>
+        <div class="form-group">
+            <label>Radio (km):</label>
+            <input type="number" step="any" id="filtroRadio" placeholder="5">
+        </div>
+        <button onclick="listarPuntos(false)">Buscar con filtros</button>
+        <button onclick="listarPuntos(true)">Listar todos</button>
+    </div>
+
+    <div id="resultados" class="resultados">
+        <h3>Resultados:</h3>
+    </div>
+</div>
+
+<script>
+    // Función para crear un punto
+    async function crearPunto() {
+        const data = {
+            nombre: document.getElementById('nombre').value,
+            descripcion: document.getElementById('descripcion').value,
+            latitud: parseFloat(document.getElementById('latitud').value),
+            longitud: parseFloat(document.getElementById('longitud').value),
+            categoria: document.getElementById('categoria').value
+        };
+        if (!data.nombre || isNaN(data.latitud) || isNaN(data.longitud)) {
+            alert('Por favor complete nombre, latitud y longitud correctamente.');
+            return;
+        }
+        try {
+            const response = await fetch('/api/puntos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                alert('Punto creado exitosamente');
+                // Limpiar formulario
+                document.getElementById('nombre').value = '';
+                document.getElementById('descripcion').value = '';
+                document.getElementById('latitud').value = '';
+                document.getElementById('longitud').value = '';
+                // Refrescar lista
+                listarPuntos(true);
+            } else {
+                const error = await response.json();
+                alert('Error: ' + JSON.stringify(error));
+            }
+        } catch (err) {
+            alert('Error de conexión: ' + err.message);
+        }
+    }
+
+    // Función para listar puntos
+    async function listarPuntos(todos = false) {
+        let url = '/api/puntos?';
+        if (!todos) {
+            const categoria = document.getElementById('filtroCategoria').value;
+            const lat = document.getElementById('filtroLat').value;
+            const lng = document.getElementById('filtroLng').value;
+            const radio = document.getElementById('filtroRadio').value;
+            if (categoria) url += `categoria=${encodeURIComponent(categoria)}&`;
+            if (lat && lng && radio) {
+                url += `lat=${parseFloat(lat)}&lng=${parseFloat(lng)}&radio_km=${parseFloat(radio)}&`;
+            }
+        }
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error al obtener datos');
+            const puntos = await response.json();
+            const divResultados = document.getElementById('resultados');
+            if (puntos.length === 0) {
+                divResultados.innerHTML = '<h3>Resultados:</h3><p>No se encontraron puntos.</p>';
+                return;
+            }
+            let html = '<h3>Resultados:</h3>';
+            puntos.forEach(p => {
+                html += `
+                    <div class="punto">
+                        <strong>${escapeHtml(p.nombre)}</strong> (${escapeHtml(p.categoria)})<br>
+                        ${escapeHtml(p.descripcion || 'Sin descripción')}<br>
+                        📍 Coordenadas: ${p.latitud}, ${p.longitud}
+                    </div>
+                `;
+            });
+            divResultados.innerHTML = html;
+        } catch (err) {
+            document.getElementById('resultados').innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
+        }
+    }
+
+    // Función auxiliar para evitar XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Cargar todos los puntos al iniciar la página
+    document.addEventListener('DOMContentLoaded', () => {
+        listarPuntos(true);
+    });
+</script>
+</body>
+</html>
