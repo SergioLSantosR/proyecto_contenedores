@@ -69,7 +69,7 @@ proyecto_contenedores/
 Los datos de la base de datos persisten gracias al volumen datos-postgres. Para borrar también los datos, usar:
    docker compose down -v
 
-##EndPoints de la API
+## EndPoints de la API
 * POST /api/puntos  --- Crear un punto (JSON con nombre, descripción, latitud, logitud, categoria).
 * GET /api/puntos   --- Listar puntos. Parámetros adicionales:
    categoria (String)
