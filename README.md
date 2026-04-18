@@ -25,11 +25,9 @@ proyecto_contenedores/
 │   ├── app
 │   │   ├── crud.py
 │   │   ├── database.py
-│   │   ├── __init__.py
+│   │   ├── _init_.py
 │   │   ├── main.py
 │   │   ├── models.py
-│   │   ├── __pycache__
-│   │   │   └── main.cpython-313.pyc
 │   │   ├── schemas.py
 │   │   └── seed.py
 │   ├── Dockerfile
@@ -45,6 +43,7 @@ proyecto_contenedores/
 ├── nginx-proxy
 │   └── nginx.conf
 └── README.md
+
 
 ## Instalación y uso (en la MV)
 
